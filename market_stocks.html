@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Stocks - Your Online Marketplace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Same CSS as before, with additions for forms and modals */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #e0e0e0;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+        header {
+            background-color: #000;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        .logo { font-size: 24px; font-weight: bold; color: #B22222; }
+        .search-bar { display: flex; gap: 10px; }
+        .search-bar input { padding: 8px; width: 300px; border: none; border-radius: 5px; background-color: #333; color: white; }
+        .search-bar button { padding: 8px 15px; background-color: #8B0000; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+        .search-bar button:hover { background-color: #B22222; }
+        .user-menu { display: flex; gap: 10px; }
+        .user-menu button { background-color: #8B0000; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
+        .sidebar { position: fixed; left: 0; top: 60px; width: 200px; height: calc(100vh - 60px); background-color: #121212; padding: 20px; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); z-index: 5; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { margin: 15px 0; }
+        .sidebar a { color: #e0e0e0; text-decoration: none; font-weight: 500; transition: color 0.3s; }
+        .sidebar a:hover { color: #B22222; }
+        .main-content { margin-left: 220px; padding: 80px 20px 20px; }
+        .hero { background-color: rgba(139, 0, 0, 0.8); padding: 40px; text-align: center; border-radius: 10px; margin-bottom: 30px; color: white; }
+        .hero h1 { margin: 0; font-size: 36px; }
+        .hero p { font-size: 18px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .product { background-color: rgba(42, 42, 42, 0.9); border: 1px solid #444; padding: 20px; text-align: center; border-radius: 10px; transition: transform 0.3s, box-shadow 0.3s; }
+        .product:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7); }
+        .product img { max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+        .product h3 { margin: 15px 0; color: #e0e0e0; }
+        .product p { color: #bbb; font-size: 16px; }
+        .product button { background-color: #8B0000; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
+        .product button:hover { background-color: #B22222; }
+        .reviews { margin-top: 10px; }
+        .review { background-color: #333; padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .review .stars { color: #FFD700; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); }
+        .modal-content { background-color: #121212; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 10px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: white; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        form input, form textarea, form select { padding: 10px; border: none; border-radius: 5px; background-color: #333; color: white; }
+        form button { padding: 10px; background-color: #8B0000; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        footer { background-color: #000; color: #bbb; text-align: center; padding: 20px; margin-top: 40px; border-top: 2px solid #8B0000; }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; top: 0; }
+            .main-content { margin-left: 0; }
+            .search-bar input { width: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Market Stocks</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search products..." id="searchInput">
+            <button onclick="searchProducts()"><i class="fas fa-search"></i> Search</button>
+        </div>
+        <div class="user-menu">
+            <button onclick="openModal('loginModal')">Login</button>
+            <button onclick="openModal('registerModal')">Register</button>
+        </div>
+    </header>
+    <div class="sidebar">
+        <ul>
+            <li><a href="#" onclick="loadProducts()"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#" onclick="loadCategories()"><i class="fas fa-list"></i> Categories</a></li>
+            <li><a href="#" onclick="loadDeals()"><i class="fas fa-tags"></i> Deals</a></li>
+            <li><a href="#" onclick="loadCart()"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+            <li><a href="#" onclick="loadAccount()"><i class="fas fa-user"></i> Account</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="hero">
+            <h1>Welcome to Market Stocks</h1>
+            <p>Discover amazing deals on everything you need. Shop now!</p>
+        </div>
+        <h2>Featured Products</h2>
+        <div class="product-grid" id="productGrid">
+            <!-- Products loaded dynamically -->
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2023 Market Stocks. All rights reserved. | <a href="#" style="color: #B22222;">Privacy Policy</a></p>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" placeholder="Name" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <select required>
+                    <option value="">Select Role</option>
+                    <option value="buyer">Buyer</option>
+                    <option value="seller">Seller</option>
+                </select>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Product Modal (for sellers) -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addProductModal')">&times;</span>
+            <h2>Add Product</h2>
+            <form id="addProductForm" enctype="multipart/form-data">
+                <input type="text" placeholder="Product Name" required>
+                <textarea placeholder="Description" required></textarea>
+                <input type="number" placeholder="Price" required>
+                <input type="file" accept="image/*" required>
+                <button type="submit">Add Product</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Placeholder functions for dynamic features
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        // Load products from API (placeholder)
+        function loadProducts() {
+            fetch('/api/products') // Replace with your backend URL
+                .then(response => response.json())
+                .then(products => {
+                    const grid = document.getElementById('productGrid');
+                    grid.innerHTML = '';
+                    products.forEach(product => {
+                        const div = document.createElement('div');
+                        div.className = 'product';
+                        div.innerHTML = `
+                            <img src="${product.image}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <p>${product.description}</p>
+                            <p>$${product.price}</p>
+                            <button onclick="addToCart(${product.id})">Add to Cart</button>
+                            <button onclick="viewReviews(${product.id})">View Reviews</button>
+                            <div class="reviews" id="reviews-${product.id}"></div>
+                        `;
+                        grid.appendChild(div);
+                    });
+                });
+        }
+
+        // Other placeholder functions
+        function searchProducts() { /* Implement search API call */ }
+        function loadCategories() { /* Load categories */ }
+        function loadDeals() { /* Load deals */ }
+        function loadCart() { /* Load cart */ }
+        function loadAccount() { /* Load account, show add product for sellers */ }
+        function addToCart(productId) { /* Add to cart API */ }
+        function viewReviews(productId) { /* Load and display reviews */ }
+
+        // Form submissions (placeholder)
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Send to /api/login
+            alert('Login submitted');
+        });
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Send to /api/register
+            alert('Registration submitted');
+        });
+        document.getElementById('addProductForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Send to /api/products
+            alert('Product added');
+        });
+
+        // Load initial products
+        loadProducts();
+    </script>
+</body>
+</html>
